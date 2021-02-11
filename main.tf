@@ -1,3 +1,8 @@
+terraform {
+  // Enable the optional attributes experiment
+  experiments = [module_variable_optional_attrs]
+}
+
 // Create the logs group
 resource "aws_cloudwatch_log_group" "loggroup" {
   name              = var.log_group_config.name
@@ -23,9 +28,9 @@ data "aws_iam_policy_document" "logging" {
 
 resource "aws_cloudwatch_log_subscription_filter" "subscription" {
   count           = length(var.subscriptions)
-  name            = var.subscriptions[count.index].name
+  name            = var.subscriptions[count.index].name != null ? var.subscriptions[count.index].arn : "Lambda Subscription"
   log_group_name  = aws_cloudwatch_log_group.loggroup.name
-  filter_pattern  = var.subscriptions[count.index].filter
+  filter_pattern  = var.subscriptions[count.index].filter != null ? var.subscriptions[count.index].filter : ""
   destination_arn = var.subscriptions[count.index].arn
 }
 

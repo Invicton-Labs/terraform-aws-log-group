@@ -5,7 +5,7 @@ output "log_group" {
 
 output "logging_policy_json" {
   description = "The JSON representation of an IAM policy that allows writing logs to this Log Group."
-  value       = data.aws_iam_policy_document.logging
+  value       = data.aws_iam_policy_document.logging.json
 }
 
 output "complete" {
