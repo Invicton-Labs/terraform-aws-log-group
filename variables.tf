@@ -10,11 +10,13 @@ variable "log_group_config" {
 }
 
 variable "subscriptions" {
-  description = "A list of configurations for Lambda subscriptions to the this Log Group. Each element should be a map with `arn` (required), `name` (optional), and `filter` (optional)."
+  description = "A list of configurations for Lambda subscriptions to the this Log Group. Each element should be a map with `arn` (required), `name` (required), `filter` (optional), `role_arn` (optional), and `distribution` (optional)."
   type = list(object({
-    arn    = string
-    name   = optional(string)
-    filter = optional(string)
+    arn          = string
+    name         = string
+    filter       = optional(string)
+    role_arn     = optional(string)
+    distribution = optional(string)
   }))
   default = []
 }
