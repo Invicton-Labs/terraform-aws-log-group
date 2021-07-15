@@ -41,8 +41,8 @@ resource "aws_cloudwatch_log_subscription_filter" "subscription" {
   ]
   name            = var.subscriptions[count.index].name
   log_group_name  = aws_cloudwatch_log_group.loggroup.name
-  filter_pattern  = var.subscriptions[count.index].filter != null ? var.subscriptions[count.index].filter : ""
-  destination_arn = var.subscriptions[count.index].arn
+  filter_pattern  = var.subscriptions[count.index].filter_pattern != null ? var.subscriptions[count.index].filter_pattern : ""
+  destination_arn = var.subscriptions[count.index].destination_arn
   role_arn        = var.subscriptions[count.index].role_arn
   distribution    = var.subscriptions[count.index].distribution
 }
@@ -50,7 +50,7 @@ resource "aws_cloudwatch_log_subscription_filter" "subscription" {
 // Parse the subscription ARNs
 data "aws_arn" "subscription_arns" {
   count = length(var.subscriptions)
-  arn   = var.subscriptions[count.index].arn
+  arn   = var.subscriptions[count.index].destination_arn
 }
 
 locals {
