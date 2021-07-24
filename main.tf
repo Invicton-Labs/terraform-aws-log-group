@@ -33,40 +33,39 @@ data "aws_iam_policy_document" "logging" {
 }
 
 // Create each subscription filter
-resource "aws_cloudwatch_log_subscription_filter" "subscription" {
-  count = length(var.subscriptions)
+resource "aws_cloudwatch_log_subscription_filter" "lambda_subscriptions" {
+  count = length(var.lambda_subscriptions)
   // Wait for proper permissions to be granted for Lambda subscriptions before creating the subscriptions themselves
   depends_on = [
     aws_lambda_permission.allow_cloudwatch
   ]
-  name            = var.subscriptions[count.index].name
+  name            = var.lambda_subscriptions[count.index].name
   log_group_name  = aws_cloudwatch_log_group.loggroup.name
-  filter_pattern  = var.subscriptions[count.index].filter_pattern != null ? var.subscriptions[count.index].filter_pattern : ""
-  destination_arn = var.subscriptions[count.index].destination_arn
-  role_arn        = var.subscriptions[count.index].role_arn
-  distribution    = var.subscriptions[count.index].distribution
+  filter_pattern  = var.lambda_subscriptions[count.index].filter_pattern != null ? var.lambda_subscriptions[count.index].filter_pattern : ""
+  destination_arn = var.lambda_subscriptions[count.index].destination_arn
+  distribution    = var.lambda_subscriptions[count.index].distribution
 }
 
-// Parse the subscription ARNs
-data "aws_arn" "subscription_arns" {
-  count = length(var.subscriptions)
-  arn   = var.subscriptions[count.index].destination_arn
-}
-
-locals {
-  // Filter for Lambda subscriptions
-  lambda_subscriptions = length(data.aws_arn.subscription_arns) > 0 ? [
-    for i, v in var.subscriptions :
-    v
-    if lower(data.aws_arn.subscription_arns[i].service) == "lambda"
-  ] : []
+// Create each subscription filter
+resource "aws_cloudwatch_log_subscription_filter" "non_lambda_subscriptions" {
+  count = length(var.non_lambda_subscriptions)
+  // Wait for proper permissions to be granted for Lambda subscriptions before creating the subscriptions themselves
+  depends_on = [
+    aws_lambda_permission.allow_cloudwatch
+  ]
+  name            = var.non_lambda_subscriptions[count.index].name
+  log_group_name  = aws_cloudwatch_log_group.loggroup.name
+  filter_pattern  = var.non_lambda_subscriptions[count.index].filter_pattern != null ? var.non_lambda_subscriptions[count.index].filter_pattern : ""
+  destination_arn = var.non_lambda_subscriptions[count.index].destination_arn
+  role_arn        = var.non_lambda_subscriptions[count.index].role_arn
+  distribution    = var.non_lambda_subscriptions[count.index].distribution
 }
 
 // For each Lambda subscription, create a Lambda permission
 resource "aws_lambda_permission" "allow_cloudwatch" {
-  for_each      = toset(local.lambda_subscriptions)
+  count         = length(var.lambda_subscriptions)
   action        = "lambda:InvokeFunction"
-  function_name = each.value.arn
+  function_name = var.lambda_subscriptions[count.index].destination_arn
   principal     = "logs.amazonaws.com"
   source_arn    = aws_cloudwatch_log_group.loggroup.arn
 }

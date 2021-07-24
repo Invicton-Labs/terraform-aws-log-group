@@ -9,8 +9,19 @@ variable "log_group_config" {
   })
 }
 
-variable "subscriptions" {
-  description = "A list of configurations for Lambda subscriptions to the this Log Group. Each element should be a map with `destination_arn` (required), `name` (required), `filter_pattern` (optional), `role_arn` (optional), and `distribution` (optional)."
+variable "lambda_subscriptions" {
+  description = "A list of configurations for Lambda subscriptions to the this Log Group. Each element should be a map with `destination_arn` (required), `name` (required), `filter_pattern` (optional), and `distribution` (optional)."
+  type = list(object({
+    destination_arn = string
+    name            = string
+    filter_pattern  = optional(string)
+    distribution    = optional(string)
+  }))
+  default = []
+}
+
+variable "non_lambda_subscriptions" {
+  description = "A list of configurations for non-Lambda subscriptions to the this Log Group. Each element should be a map with `destination_arn` (required), `name` (required), `filter_pattern` (optional), `role_arn` (optional), and `distribution` (optional)."
   type = list(object({
     destination_arn = string
     name            = string

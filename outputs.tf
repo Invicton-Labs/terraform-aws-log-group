@@ -12,7 +12,8 @@ output "complete" {
   description = "A flag for determining when everything in this module has been created."
   depends_on = [
     aws_cloudwatch_log_group.loggroup,
-    aws_cloudwatch_log_subscription_filter.subscription,
+    aws_cloudwatch_log_subscription_filter.lambda_subscriptions,
+    aws_cloudwatch_log_subscription_filter.non_lambda_subscriptions,
     aws_lambda_permission.allow_cloudwatch
   ]
   value = true
