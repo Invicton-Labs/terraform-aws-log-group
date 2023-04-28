@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">= 1.3"
+  required_version = ">= 1.4.6"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 3.38"
+      version = ">= 4.64"
     }
   }
 }
@@ -60,11 +60,16 @@ resource "aws_cloudwatch_log_subscription_filter" "non_lambda_subscriptions" {
   distribution    = var.non_lambda_subscriptions[count.index].distribution
 }
 
+data "aws_arn" "destination" {
+  count = length(var.lambda_subscriptions)
+  arn   = var.lambda_subscriptions[count.index].destination_arn
+}
+
 // For each Lambda subscription, create a Lambda permission
 resource "aws_lambda_permission" "allow_cloudwatch" {
   count         = length(var.lambda_subscriptions)
   action        = "lambda:InvokeFunction"
-  function_name = var.lambda_subscriptions[count.index].destination_arn
+  function_name = split(":", data.aws_arn.destination[count.index].resource)[1]
   principal     = "logs.amazonaws.com"
   source_arn    = aws_cloudwatch_log_group.loggroup.arn
 }
